@@ -1,4 +1,3 @@
-// lib/providers/meal_provider.dart
 import 'package:flutter/foundation.dart';
 import '../models/meal.dart';
 import '../services/meal_service.dart';

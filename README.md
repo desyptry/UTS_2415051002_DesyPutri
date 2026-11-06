@@ -184,4 +184,7 @@ Profile pictures are located in `assets/images/`:
 * Configured in `pubspec.yaml` under `assets:` and `lib/data/user_constants.dart`.
 
 ---
+## 📄 UTS Documentation
+- PDF: `UTS_2415051002_DesyPutri.pdf` (lampiran terpisah)
+- APK: `UTS_2415051002_DesyPutri.apk`
 *Built with ❤️ for UTS PTI Semester 5*
