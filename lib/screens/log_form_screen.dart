@@ -1,4 +1,4 @@
-// lib/screens/log_form_screen.dart
+// Milestone 11: Update data feature (edit mode)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/daily_log.dart';
