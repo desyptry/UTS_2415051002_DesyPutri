@@ -3,6 +3,12 @@
 **NutriTrack** is a modern Flutter mobile application designed to help individuals monitor their daily health habits, track hydration and body weight, calculate Body Mass Index (BMI), and explore nutritious meals and recipes.
 
 ---
+# Release Notes - NutriTrack UTS
+
+- Version: 1.0.0
+- Build: Release APK
+- Date: 2026-11-06
+- Description: UTS submission for Mobile Programming.
 
 ## 👤 Student Profile
 * **Name**: Luh Desy Putri Yanti
