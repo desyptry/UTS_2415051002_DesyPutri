@@ -5,7 +5,12 @@ import '../providers/health_provider.dart';
 import 'log_form_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final VoidCallback onNavigateToHistory; // ← Tambahan Callback
+
+  const HomeScreen({
+    super.key,
+    required this.onNavigateToHistory,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                   icon: Icons.list_alt,
                   label: 'History',
                   color: Colors.orange,
-                  onTap: () {},
+                  onTap: onNavigateToHistory, // ← Panggil callback
                 ),
               ),
             ],

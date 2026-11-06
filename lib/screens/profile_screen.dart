@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/user_constants.dart';
 import '../providers/health_provider.dart';
+import 'recipe_detail_screen.dart'; // Import untuk navigasi ke detail
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -49,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.calculate, color: Color(0xFF00BFA5)),
               title: const Text('BMI Calculator'),
-              subtitle: const Text('Calculate your body mass index'),
+              subtitle: const Text('Calculate Body Mass Index'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 14),
               onTap: () => _showBmiDialog(context),
             ),
@@ -62,7 +63,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerLeft,
-            child: Text('Favorites (${health.favoriteCount})',
+            child: Text('Favorite Recipes (${health.favoriteCount})',
                 style: const TextStyle(
                     fontSize: 16, fontWeight: FontWeight.bold)),
           ),
@@ -83,19 +84,30 @@ class ProfileScreen extends StatelessWidget {
             )
           else
             ...health.favorites.map((fav) => Card(
+                  margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
+                    // Klik item untuk buka detail resep
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RecipeDetailScreen(
+                            mealId: fav['meal_id'],
+                            initialImage: fav['meal_thumb'] ?? '',
+                            initialTitle: fav['meal_name'] ?? '',
+                          ),
+                        ),
+                      );
+                    },
                     leading: fav['meal_thumb'] != null
                         ? Image.network(fav['meal_thumb'],
                             width: 50, height: 50, fit: BoxFit.cover)
-                        : const Icon(Icons.restaurant),
+                        : const Icon(Icons.restaurant, size: 50),
                     title: Text(fav['meal_name'] ?? ''),
+                    // Tombol hapus dengan konfirmasi
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () {
-                        context
-                            .read<HealthProvider>()
-                            .removeFavorite(fav['meal_id']);
-                      },
+                      onPressed: () => _confirmRemoveFavorite(context, fav['meal_id'], fav['meal_name']),
                     ),
                   ),
                 )),
@@ -103,6 +115,39 @@ class ProfileScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Dialog konfirmasi hapus favorit
+  Future<void> _confirmRemoveFavorite(BuildContext context, String mealId, String mealName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Remove Favorite?'),
+        content: Text('Remove "$mealName" from your favorites?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success = await context.read<HealthProvider>().removeFavorite(mealId);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(success ? 'Removed from favorites' : 'Failed to remove'),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
   }
 
   void _showBmiDialog(BuildContext context) {
@@ -143,7 +188,7 @@ class ProfileScreen extends StatelessWidget {
                           ? 'Normal'
                           : bmi! < 30
                               ? 'Overweight'
-                              : 'Obesity',
+                              : 'Obese',
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
