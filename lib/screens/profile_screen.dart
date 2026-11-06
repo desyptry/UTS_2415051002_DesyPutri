@@ -1,3 +1,4 @@
+// lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -14,69 +15,104 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final health = context.watch<HealthProvider>();
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTabletOrDesktop = screenWidth >= 720;
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      child: Column(
-        children: [
-          // 1. Profile Hero Card with Photo Support
-          _buildProfileCard(context),
-          const SizedBox(height: 18),
-
-          // 2. Health Stats Counter
-          _buildStatsSummary(context, health),
-          const SizedBox(height: 18),
-
-          // 3. BMI Calculator Card
-          _buildBmiLauncherCard(context),
-          const SizedBox(height: 24),
-
-          // 4. Favorite Recipes Section Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: EdgeInsets.symmetric(
+        horizontal: isTabletOrDesktop ? 24 : 18,
+        vertical: 16,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 960),
+          child: Column(
             children: [
-              Row(
-                children: [
-                  const Text(
-                    'Favorite Recipes',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textDark,
-                      letterSpacing: -0.3,
+              if (isTabletOrDesktop)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Left: Profile Card
+                    Expanded(
+                      flex: 5,
+                      child: _buildProfileCard(context),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryLight,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '${health.favoriteCount}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primaryDark,
+                    const SizedBox(width: 16),
+                    // Right: Stats & BMI
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        children: [
+                          _buildStatsSummary(context, health),
+                          const SizedBox(height: 16),
+                          _buildBmiLauncherCard(context),
+                        ],
                       ),
                     ),
+                  ],
+                )
+              else ...[
+                // 1. Profile Hero Card with Photo Support
+                _buildProfileCard(context),
+                const SizedBox(height: 18),
+
+                // 2. Health Stats Counter
+                _buildStatsSummary(context, health),
+                const SizedBox(height: 18),
+
+                // 3. BMI Calculator Card
+                _buildBmiLauncherCard(context),
+              ],
+              const SizedBox(height: 24),
+
+              // 4. Favorite Recipes Section Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'Favorite Recipes',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textDark,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${health.favoriteCount}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryDark,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+              const SizedBox(height: 12),
+
+              // 5. Favorites List
+              _buildFavoritesList(context, health),
+              const SizedBox(height: 24),
+
+              // 6. About App Card
+              _buildAppInfoCard(context, health),
+              const SizedBox(height: 32),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // 5. Favorites List
-          _buildFavoritesList(context, health),
-          const SizedBox(height: 24),
-
-          // 6. About App Card
-          _buildAppInfoCard(context, health),
-          const SizedBox(height: 32),
-        ],
+        ),
       ),
     );
   }
@@ -500,6 +536,9 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     IconButton(
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.all(6),
+                      constraints: const BoxConstraints(),
                       icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                       tooltip: 'Remove',
                       onPressed: () => _confirmRemoveFavorite(context, mealId, mealName),

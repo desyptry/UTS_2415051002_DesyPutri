@@ -1,4 +1,4 @@
-// Milestone 11: Update data feature (edit mode)
+// lib/screens/log_form_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/daily_log.dart';
@@ -133,40 +133,48 @@ class _LogFormScreenState extends State<LogFormScreen> {
             borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white.withValues(alpha: 0.2),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        isEdit ? 'Edit Log' : 'Add Daily Log',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 14),
-                  Text(
-                    isEdit ? 'Edit Log' : 'Add Daily Log',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.all(18),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(18),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               // 1. Date Card
               _buildSectionCard(
                 title: 'Log Date',
@@ -383,7 +391,9 @@ class _LogFormScreenState extends State<LogFormScreen> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 
   Widget _buildSectionCard({

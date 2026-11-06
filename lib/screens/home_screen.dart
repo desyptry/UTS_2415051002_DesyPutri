@@ -1,3 +1,4 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/user_constants.dart';
@@ -38,6 +39,9 @@ class HomeScreen extends StatelessWidget {
     final latestWeight = health.latestWeight;
     final latestWeightDate = health.latestWeightDate;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTabletOrDesktop = screenWidth >= 720;
+
     return RefreshIndicator(
       onRefresh: () async {
         await health.loadLogs();
@@ -46,20 +50,103 @@ class HomeScreen extends StatelessWidget {
       color: AppColors.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Welcome Hero Header with UserAvatar
-            _buildHeroHeader(context),
-            const SizedBox(height: 20),
-
-            // 2. Section Header: Daily Tracker
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        padding: EdgeInsets.symmetric(
+          horizontal: isTabletOrDesktop ? 24 : 18,
+          vertical: 16,
+        ),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1140),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Daily Summary',
+                // 1. Welcome Hero Header with UserAvatar
+                _buildHeroHeader(context),
+                const SizedBox(height: 20),
+
+                // 2. Section Header: Daily Tracker
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Daily Summary',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    Text(
+                      'Goal: 2,000 ml',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // 3 & 4. Water & Weight Cards (Side-by-side on tablet/desktop, stacked on mobile)
+                if (isTabletOrDesktop)
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: _buildWaterCard(
+                            context: context,
+                            currentWater: currentWater,
+                            waterLogCount: waterLogCount,
+                            waterDate: waterDate,
+                            dailyAvgWater: health.dailyAverageWater,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          flex: 5,
+                          child: _buildWeightCard(
+                            context: context,
+                            latestWeight: latestWeight,
+                            latestWeightDate: latestWeightDate,
+                            isCompact: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  _buildWaterCard(
+                    context: context,
+                    currentWater: currentWater,
+                    waterLogCount: waterLogCount,
+                    waterDate: waterDate,
+                    dailyAvgWater: health.dailyAverageWater,
+                  ),
+                  const SizedBox(height: 14),
+                  _buildWeightCard(
+                    context: context,
+                    latestWeight: latestWeight,
+                    latestWeightDate: latestWeightDate,
+                    isCompact: true,
+                  ),
+                ],
+                const SizedBox(height: 24),
+
+                // 5. Featured Recipe Recommendation Banner
+                _buildRecipeRecommendationSection(context, meals, mealProvider),
+                const SizedBox(height: 24),
+
+                // 6. Daily Health Tip Banner
+                _buildHealthTipBanner(),
+                const SizedBox(height: 22),
+
+                // 7. Quick Action Grid
+                const Text(
+                  'Quick Actions',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
@@ -67,87 +154,41 @@ class HomeScreen extends StatelessWidget {
                     letterSpacing: -0.3,
                   ),
                 ),
-                Text(
-                  'Goal: 2,000 ml',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryDark,
+                const SizedBox(height: 12),
+                _buildQuickActionGrid(context),
+                const SizedBox(height: 22),
+
+                // 8. Recent Log Preview
+                if (logs.isNotEmpty) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Recent Logs',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textDark,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onNavigateToHistory,
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          foregroundColor: AppColors.primaryDark,
+                        ),
+                        child: const Text('View All →'),
+                      ),
+                    ],
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  _buildRecentLogsPreview(context, logs.take(2).toList()),
+                ],
+                const SizedBox(height: 24),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // 3. Water Intake Card (Calculates sum of additions from history)
-            _buildWaterCard(
-              context: context,
-              currentWater: currentWater,
-              waterLogCount: waterLogCount,
-              waterDate: waterDate,
-              dailyAvgWater: health.dailyAverageWater,
-            ),
-            const SizedBox(height: 14),
-
-            // 4. Weight Card (Synchronized with latest history entry)
-            _buildWeightCard(
-              context: context,
-              latestWeight: latestWeight,
-              latestWeightDate: latestWeightDate,
-            ),
-            const SizedBox(height: 24),
-
-            // 5. Featured Recipe Recommendation Banner
-            _buildRecipeRecommendationSection(context, meals, mealProvider),
-            const SizedBox(height: 24),
-
-            // 6. Daily Health Tip Banner
-            _buildHealthTipBanner(),
-            const SizedBox(height: 22),
-
-            // 7. Quick Action Grid
-            const Text(
-              'Quick Actions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textDark,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildQuickActionGrid(context),
-            const SizedBox(height: 22),
-
-            // 8. Recent Log Preview
-            if (logs.isNotEmpty) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Recent Logs',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textDark,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: onNavigateToHistory,
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      foregroundColor: AppColors.primaryDark,
-                    ),
-                    child: const Text('View All →'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              _buildRecentLogsPreview(context, logs.take(2).toList()),
-            ],
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );
@@ -308,14 +349,18 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Water Intake ($waterDate)',
-                            style: const TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textDark,
+                          Expanded(
+                            child: Text(
+                              'Water Intake ($waterDate)',
+                              style: const TextStyle(
+                                fontSize: 14.5,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textDark,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
@@ -423,6 +468,7 @@ class HomeScreen extends StatelessWidget {
     required BuildContext context,
     required double? latestWeight,
     required String? latestWeightDate,
+    bool isCompact = true,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -437,90 +483,187 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.coralLight,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.monitor_weight_outlined,
-              color: AppColors.coral,
-              size: 26,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(20),
+      child: isCompact
+          ? Row(
               children: [
-                const Text(
-                  'Latest Weight',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textMuted,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: AppColors.coralLight,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.monitor_weight_outlined,
+                    color: AppColors.coral,
+                    size: 26,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Latest Weight',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              latestWeight != null
+                                  ? '${latestWeight.toStringAsFixed(1)} '
+                                  : 'No data recorded',
+                              style: TextStyle(
+                                fontSize: latestWeight != null ? 22 : 15,
+                                fontWeight: FontWeight.w800,
+                                color: latestWeight != null
+                                    ? AppColors.textDark
+                                    : AppColors.textLight,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (latestWeight != null)
+                            const Text(
+                              'kg',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                if (latestWeightDate != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF1F5F9),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.event_outlined, size: 14, color: AppColors.textMuted),
+                        const SizedBox(width: 4),
+                        Text(
+                          latestWeightDate,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: AppColors.coralLight,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: const Icon(
+                            Icons.monitor_weight_outlined,
+                            color: AppColors.coral,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Latest Weight',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (latestWeightDate != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          latestWeightDate,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 18),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
                     Text(
                       latestWeight != null
-                          ? '${latestWeight.toStringAsFixed(1)} '
-                          : 'No data recorded',
+                          ? latestWeight.toStringAsFixed(1)
+                          : 'No data',
                       style: TextStyle(
-                        fontSize: latestWeight != null ? 22 : 15,
-                        fontWeight: FontWeight.w800,
+                        fontSize: latestWeight != null ? 30 : 18,
+                        fontWeight: FontWeight.w900,
                         color: latestWeight != null
                             ? AppColors.textDark
                             : AppColors.textLight,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    if (latestWeight != null)
+                    if (latestWeight != null) ...[
+                      const SizedBox(width: 4),
                       const Text(
                         'kg',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: FontWeight.w600,
                           color: AppColors.textMuted,
                         ),
                       ),
+                    ],
                   ],
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Recorded in your health log history ⚖️',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
-          ),
-          if (latestWeightDate != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.event_outlined, size: 14, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Text(
-                    latestWeightDate,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
     );
   }
 
@@ -738,7 +881,9 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -755,8 +900,7 @@ class HomeScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (meal.strArea != null) ...[
-                                const SizedBox(width: 6),
+                              if (meal.strArea != null)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
@@ -772,8 +916,6 @@ class HomeScreen extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              ],
-                              const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
@@ -1219,6 +1361,9 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               IconButton(
+                visualDensity: VisualDensity.compact,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(),
                 icon: const Icon(Icons.edit_outlined, size: 20, color: AppColors.textMuted),
                 onPressed: () {
                   Navigator.push(

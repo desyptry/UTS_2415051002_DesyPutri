@@ -1,3 +1,4 @@
+// lib/screens/log_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/daily_log.dart';
@@ -92,24 +93,29 @@ class LogScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: ListView.builder(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-        itemCount: health.logs.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return _buildSummaryHeader(
-              uniqueDays: health.uniqueDaysTracked,
-              totalEntries: health.logs.length,
-              totalWater: health.totalWaterAllTime,
-              dailyAvgWater: health.dailyAverageWater,
-              latestWeight: health.latestWeight,
-            );
-          }
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 880),
+          child: ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+            itemCount: health.logs.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildSummaryHeader(
+                  uniqueDays: health.uniqueDaysTracked,
+                  totalEntries: health.logs.length,
+                  totalWater: health.totalWaterAllTime,
+                  dailyAvgWater: health.dailyAverageWater,
+                  latestWeight: health.latestWeight,
+                );
+              }
 
-          final log = health.logs[index - 1];
-          return _buildLogCard(context, log, index - 1, health);
-        },
+              final log = health.logs[index - 1];
+              return _buildLogCard(context, log, index - 1, health);
+            },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -329,61 +335,59 @@ class LogScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          log.date,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textDark,
+                Expanded(
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        log.date,
+                        style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      if (isToday)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'TODAY',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                        if (isToday) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'TODAY',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
+                      if (dayLogCount > 1)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2FE),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Day: $dayTotal ml',
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF0369A1),
                             ),
                           ),
-                        ],
-                        if (dayLogCount > 1) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0F2FE),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'Day: $dayTotal ml',
-                              style: const TextStyle(
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0369A1),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
+                        ),
+                    ],
+                  ),
                 ),
-                const Spacer(),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.edit_outlined, size: 19, color: AppColors.textMuted),
                   tooltip: 'Edit Log',
                   onPressed: () {
@@ -393,7 +397,11 @@ class LogScreen extends StatelessWidget {
                     );
                   },
                 ),
+                const SizedBox(width: 4),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(),
                   icon: const Icon(Icons.delete_outline_rounded, size: 19, color: Colors.redAccent),
                   tooltip: 'Delete Log',
                   onPressed: () => _confirmDelete(context, log, index),
@@ -437,12 +445,16 @@ class LogScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(
-                              '${log.waterMl} ml',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF01579B),
+                            Flexible(
+                              child: Text(
+                                '${log.waterMl} ml',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF01579B),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             if (dayLogCount > 1) ...[
@@ -507,6 +519,8 @@ class LogScreen extends StatelessWidget {
                             fontWeight: FontWeight.w900,
                             color: const Color(0xFFBF360C),
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
                         Text(

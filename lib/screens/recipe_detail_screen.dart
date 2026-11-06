@@ -204,30 +204,35 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
 
           // 2. Content Details
           SliverToBoxAdapter(
-            child: isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(40),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          CircularProgressIndicator(color: AppColors.primary),
-                          SizedBox(height: 16),
-                          Text(
-                            'Loading ingredients and instructions...',
-                            style: TextStyle(color: AppColors.textMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : meal == null
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 960),
+                child: isLoading
                     ? const Padding(
                         padding: EdgeInsets.all(40),
                         child: Center(
-                          child: Text('Failed to load recipe details.'),
+                          child: Column(
+                            children: [
+                              CircularProgressIndicator(color: AppColors.primary),
+                              SizedBox(height: 16),
+                              Text(
+                                'Loading ingredients and instructions...',
+                                style: TextStyle(color: AppColors.textMuted),
+                              ),
+                            ],
+                          ),
                         ),
                       )
-                    : _buildContent(context, meal),
+                    : meal == null
+                        ? const Padding(
+                            padding: EdgeInsets.all(40),
+                            child: Center(
+                              child: Text('Failed to load recipe details.'),
+                            ),
+                          )
+                        : _buildContent(context, meal),
+              ),
+            ),
           ),
         ],
       ),
@@ -671,10 +676,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           Text(
             value,
             style: const TextStyle(
-              fontSize: 15,
+              fontSize: 14.5,
               fontWeight: FontWeight.w800,
               color: AppColors.textDark,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             unit,

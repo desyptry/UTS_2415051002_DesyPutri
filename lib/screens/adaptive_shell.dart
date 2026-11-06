@@ -1,3 +1,4 @@
+// lib/screens/adaptive_shell.dart
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_logo.dart';
@@ -48,7 +49,9 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
       const ProfileScreen(),
     ];
 
-    final isCompact = MediaQuery.of(context).size.width < 840;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isCompact = screenWidth < 720;
+    final isDesktop = screenWidth >= 1100;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -70,47 +73,56 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
           ),
           child: SafeArea(
             bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Row(
-                children: [
-                  const AppLogo(size: 44, borderRadius: 14),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _tabHeaders[currentIndex].title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1240),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    children: [
+                      const AppLogo(size: 44, borderRadius: 14),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _tabHeaders[currentIndex].title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _tabHeaders[currentIndex].subtitle,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.88),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _tabHeaders[currentIndex].subtitle,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.88),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-      body: isCompact ? pages[currentIndex] : _buildExpandedLayout(pages),
+      body: isCompact
+          ? pages[currentIndex]
+          : _buildExpandedLayout(pages, isDesktop),
       bottomNavigationBar: isCompact ? _buildBottomNavBar() : null,
     );
   }
@@ -156,18 +168,38 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
     );
   }
 
-  Widget _buildExpandedLayout(List<Widget> pages) {
+  Widget _buildExpandedLayout(List<Widget> pages, bool isDesktop) {
     return Row(
       children: [
         NavigationRail(
+          extended: isDesktop,
+          minExtendedWidth: 200,
           selectedIndex: currentIndex,
           onDestinationSelected: (i) => setState(() => currentIndex = i),
-          labelType: NavigationRailLabelType.all,
+          labelType: isDesktop
+              ? NavigationRailLabelType.none
+              : NavigationRailLabelType.all,
           backgroundColor: Colors.white,
           indicatorColor: AppColors.primaryLight,
-          leading: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: AppLogo(size: 42, borderRadius: 12),
+          leading: Padding(
+            padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const AppLogo(size: 40, borderRadius: 12),
+                if (isDesktop) ...[
+                  const SizedBox(width: 10),
+                  const Text(
+                    'NutriTrack',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryDark,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
           destinations: const [
             NavigationRailDestination(
@@ -193,7 +225,14 @@ class _AdaptiveShellState extends State<AdaptiveShell> {
           ],
         ),
         const VerticalDivider(thickness: 1, width: 1, color: AppColors.cardBorder),
-        Expanded(child: pages[currentIndex]),
+        Expanded(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1240),
+              child: pages[currentIndex],
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -1,3 +1,4 @@
+// lib/widgets/meal_card.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/meal.dart';
@@ -208,19 +209,23 @@ class MealCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.timer_outlined, size: 12, color: AppColors.textMuted),
                           const SizedBox(width: 3),
-                          Text(
-                            'P:${meal.prepTimeMinutes}m • C:${meal.cookTimeMinutes}m',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textMuted,
+                          Expanded(
+                            child: Text(
+                              'P:${meal.prepTimeMinutes}m • C:${meal.cookTimeMinutes}m',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          const Spacer(),
+                          const SizedBox(width: 4),
                           const Text(
                             'View →',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10.5,
                               fontWeight: FontWeight.w700,
                               color: AppColors.primaryDark,
                             ),
