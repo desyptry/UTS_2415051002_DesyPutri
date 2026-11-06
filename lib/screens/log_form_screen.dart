@@ -75,8 +75,8 @@ class _LogFormScreenState extends State<LogFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(isEdit
-              ? 'Log berhasil di-update!'
-              : 'Log berhasil ditambahkan!'),
+              ? 'Log successfully updated!'
+              : 'Log successfully added!'),
           backgroundColor: Colors.green,
         ),
       );
@@ -84,7 +84,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Gagal: ${provider.errorLogs ?? "Unknown"}'),
+          content: Text('Failed: ${provider.errorLogs ?? "Unknown"}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -97,7 +97,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'Edit Log' : 'Tambah Log'),
+        title: Text(isEdit ? 'Edit Log' : 'Add Log'),
         backgroundColor: const Color(0xFF00BFA5),
         foregroundColor: Colors.white,
       ),
@@ -108,7 +108,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Tanggal',
+              const Text('Date',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               Card(
@@ -120,7 +120,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Asupan Air (ml)',
+              const Text('Water Intake (ml)',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -128,7 +128,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Contoh: 2000',
+                  hintText: 'Example: 2000',
                   suffixText: 'ml',
                 ),
                 validator: (v) {
@@ -140,7 +140,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text('Berat Badan (kg)',
+              const Text('Weight (kg)',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -148,7 +148,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Contoh: 55.5 (opsional)',
+                  hintText: 'Example: 55.5 (optional)',
                   suffixText: 'kg',
                 ),
                 validator: (v) {
@@ -160,7 +160,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 },
               ),
               const SizedBox(height: 16),
-              const Text('Catatan (opsional)',
+              const Text('Notes (optional)',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -168,7 +168,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                 maxLines: 3,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Catatan tambahan...',
+                  hintText: 'Example notes...',
                 ),
               ),
               const SizedBox(height: 24),
@@ -183,7 +183,7 @@ class _LogFormScreenState extends State<LogFormScreen> {
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.save),
-                  label: Text(isSaving ? 'Menyimpan...' : 'Simpan'),
+                  label: Text(isSaving ? 'Saving...' : 'Save'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     backgroundColor: const Color(0xFF00BFA5),

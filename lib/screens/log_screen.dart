@@ -11,29 +11,12 @@ class LogScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final health = context.watch<HealthProvider>();
 
-    //Loading 
     if (health.isLoadingLogs) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Memuat riwayat...'),
-          ],
-        ),
-      );
+      return const Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Loading history...')]));
     }
-
-    //Error 
     if (health.errorLogs != null) {
-      return ErrorView(
-        message: health.errorLogs!,
-        onRetry: () => context.read<HealthProvider>().loadLogs(),
-      );
+      return ErrorView(message: health.errorLogs!, onRetry: () => context.read<HealthProvider>().loadLogs());
     }
-
-    // Empty 
     if (health.logs.isEmpty) {
       return Center(
         child: Column(
@@ -41,28 +24,20 @@ class LogScreen extends StatelessWidget {
           children: [
             const Icon(Icons.inbox_outlined, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text('Belum ada catatan',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('No logs yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Tambahkan log pertama kamu!',
-                style: TextStyle(color: Colors.grey)),
+            const Text('Add your first log!', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LogFormScreen()),
-                );
-              },
+              onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const LogFormScreen())); },
               icon: const Icon(Icons.add),
-              label: const Text('Tambah Log'),
+              label: const Text('Add Log'),
             ),
           ],
         ),
       );
     }
 
-    // Success 
     return Scaffold(
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -73,12 +48,7 @@ class LogScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const LogFormScreen()),
-          );
-        },
+        onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (_) => const LogFormScreen())); },
         backgroundColor: const Color(0xFF00BFA5),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -98,23 +68,10 @@ class LogScreen extends StatelessWidget {
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                 const SizedBox(width: 6),
-                Text(log.date,
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(log.date, style: const TextStyle(fontWeight: FontWeight.bold)),
                 const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.edit, size: 18),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => LogFormScreen(initialLog: log)),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                  onPressed: () => _confirmDelete(context, log, index),
-                ),
+                IconButton(icon: const Icon(Icons.edit, size: 18), onPressed: () { Navigator.push(context, MaterialPageRoute(builder: (_) => LogFormScreen(initialLog: log))); }),
+                IconButton(icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red), onPressed: () => _confirmDelete(context, log, index)),
               ],
             ),
             const Divider(),
@@ -131,8 +88,7 @@ class LogScreen extends StatelessWidget {
             ),
             if (log.notes != null && log.notes!.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('Catatan: ${log.notes}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text('Notes: ${log.notes}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ],
         ),
@@ -144,40 +100,18 @@ class LogScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Hapus Log?'),
-        content: Text('Log tanggal "${log.date}" akan dihapus permanen.'),
+        title: const Text('Delete Log?'),
+        content: Text('Log for "${log.date}" will be permanently deleted.'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Hapus'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), style: ElevatedButton.styleFrom(backgroundColor: Colors.red), child: const Text('Delete')),
         ],
       ),
     );
-
     if (confirmed == true && context.mounted) {
       final success = await context.read<HealthProvider>().deleteLog(log.id!);
       if (!context.mounted) return;
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Log berhasil dihapus!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gagal menghapus log'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(success ? 'Log deleted!' : 'Failed to delete'), backgroundColor: success ? Colors.green : Colors.red));
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/user_constants.dart';
-import '../models/daily_log.dart';
 import '../providers/health_provider.dart';
 import 'log_form_screen.dart';
 
@@ -19,7 +18,6 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Greeting
           Row(
             children: [
               const CircleAvatar(
@@ -32,24 +30,20 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Halo, $userName! 👋',
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('Hello, $userName! 👋',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 4),
-                    const Text('Ayo mulai hidup sehat hari ini.',
+                    const Text("Let's start a healthy life today",
                         style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 24),
           const Text('Dashboard',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-
-          // Kartu Air (dari Provider) 
           Card(
             elevation: 3,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -63,28 +57,18 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.water_drop, color: Colors.blue.shade700, size: 28),
                       const SizedBox(width: 8),
-                      Text('Asupan Air Hari Ini',
-                          style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade900)),
+                      Text("Today's Water Intake",
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    latestLog != null
-                        ? '${latestLog.waterMl} / 2000 ml'
-                        : 'Belum ada data',
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade900),
+                    latestLog != null ? '${latestLog.waterMl} / 2000 ml' : 'No data',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue.shade900),
                   ),
                   const SizedBox(height: 8),
                   LinearProgressIndicator(
-                    value: latestLog != null
-                        ? (latestLog.waterMl / 2000).clamp(0.0, 1.0)
-                        : 0.0,
+                    value: latestLog != null ? (latestLog.waterMl / 2000).clamp(0.0, 1.0) : 0.0,
                     backgroundColor: Colors.blue.shade100,
                     color: Colors.blue,
                     minHeight: 8,
@@ -94,10 +78,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Kartu Berat (dari Provider) 
           Card(
             elevation: 3,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -111,16 +92,10 @@ class HomeScreen extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Berat Badan Terakhir',
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      const Text('Latest Weight', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       Text(
-                        latestLog != null && latestLog.weightKg != null
-                            ? '${latestLog.weightKg} kg'
-                            : 'Belum ada data',
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange.shade900),
+                        latestLog != null && latestLog.weightKg != null ? '${latestLog.weightKg} kg' : 'No data',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange.shade900),
                       ),
                     ],
                   ),
@@ -128,23 +103,18 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 24),
-          const Text('Menu Cepat',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text('Quick Actions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: _quickMenu(
                   icon: Icons.add_circle_outline,
-                  label: '+ Catat Hari Ini',
+                  label: 'Log Today',
                   color: Colors.blue,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LogFormScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LogFormScreen()));
                   },
                 ),
               ),
@@ -152,11 +122,9 @@ class HomeScreen extends StatelessWidget {
               Expanded(
                 child: _quickMenu(
                   icon: Icons.list_alt,
-                  label: 'Riwayat',
+                  label: 'History',
                   color: Colors.orange,
-                  onTap: () {
-                    // Pindah ke tab Log (dari AdaptiveShell)
-                  },
+                  onTap: () {},
                 ),
               ),
             ],
@@ -167,12 +135,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _quickMenu({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _quickMenu({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -185,11 +148,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               Icon(icon, color: color, size: 32),
               const SizedBox(height: 8),
-              Text(label,
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: color)),
+              Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
             ],
           ),
         ),
