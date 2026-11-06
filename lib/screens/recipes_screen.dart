@@ -1,4 +1,4 @@
-// lib/screens/recipes_screen.dart
+// Milestone 14: Error handling - loading, empty, error states
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/meal_provider.dart';
