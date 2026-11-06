@@ -1,8 +1,11 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
+import 'providers/health_provider.dart';
+import 'providers/meal_provider.dart';
 import 'screens/adaptive_shell.dart';
 
 void main() async {
@@ -13,7 +16,15 @@ void main() async {
     anonKey: supabaseAnonKey,
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HealthProvider()..loadLogs()..loadFavorites()),
+        ChangeNotifierProvider(create: (_) => MealProvider()..loadMeals()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
