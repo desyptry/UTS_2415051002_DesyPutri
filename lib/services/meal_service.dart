@@ -5,7 +5,7 @@ import '../models/meal.dart';
 class MealService {
   static const String baseUrl = 'https://www.themealdb.com/api/json/v1/1';
 
-  // Cari resep berdasarkan kategori sehat 
+  // Fetch meals by category
   Future<List<Meal>> getHealthyMeals({String category = 'Seafood'}) async {
     try {
       final response = await http.get(
@@ -18,17 +18,19 @@ class MealService {
 
         if (meals == null) return [];
 
-        return meals
-            .map((e) => Meal.fromJson(e as Map<String, dynamic>))
-            .toList();
+        return meals.map((e) {
+          final item = Map<String, dynamic>.from(e as Map<String, dynamic>);
+          item['strCategory'] = category;
+          return Meal.fromJson(item);
+        }).toList();
       }
-      throw Exception('Gagal mengambil resep: HTTP ${response.statusCode}');
+      throw Exception('Failed to load recipes: HTTP ${response.statusCode}');
     } catch (e) {
       throw Exception('Error: $e');
     }
   }
 
-  // Cari resep berdasarkan kata kunci (search) 
+  // Search meals by query
   Future<List<Meal>> searchMeals(String query) async {
     try {
       final response = await http.get(
@@ -45,13 +47,13 @@ class MealService {
             .map((e) => Meal.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-      throw Exception('Gagal mencari resep: HTTP ${response.statusCode}');
+      throw Exception('Failed to search recipes: HTTP ${response.statusCode}');
     } catch (e) {
       throw Exception('Error: $e');
     }
   }
 
-  // Ambil detail resep berdasarkan ID 
+  // Fetch meal details by ID
   Future<Meal?> getMealById(String id) async {
     try {
       final response = await http.get(
@@ -66,7 +68,7 @@ class MealService {
 
         return Meal.fromJson(meals.first as Map<String, dynamic>);
       }
-      throw Exception('Gagal mengambil detail resep: HTTP ${response.statusCode}');
+      throw Exception('Failed to load recipe details: HTTP ${response.statusCode}');
     } catch (e) {
       throw Exception('Error: $e');
     }

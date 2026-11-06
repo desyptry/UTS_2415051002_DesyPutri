@@ -9,7 +9,8 @@ class HealthService {
     final data = await supabase
         .from('daily_logs')
         .select()
-        .order('date', ascending: false);
+        .order('date', ascending: false)
+        .order('id', ascending: false);
 
     return (data as List)
         .map((e) => DailyLog.fromJson(e as Map<String, dynamic>))

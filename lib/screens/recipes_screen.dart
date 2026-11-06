@@ -1,6 +1,8 @@
+// lib/screens/recipes_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/meal_provider.dart';
+import '../theme/app_colors.dart';
 import '../widgets/meal_card.dart';
 import '../widgets/error_view.dart';
 import 'recipe_detail_screen.dart';
@@ -15,12 +17,28 @@ class RecipesScreen extends StatefulWidget {
 class _RecipesScreenState extends State<RecipesScreen> {
   final _searchCtrl = TextEditingController();
 
-  final List<String> _categories = ['Seafood', 'Vegetarian', 'Vegan', 'Chicken'];
+  final List<({String key, String label})> _categories = const [
+    (key: 'Seafood', label: '🐟 Seafood'),
+    (key: 'Vegetarian', label: '🥗 Vegetarian'),
+    (key: 'Vegan', label: '🌱 Vegan'),
+    (key: 'Chicken', label: '🍗 Chicken'),
+    (key: 'Beef', label: '🥩 Beef'),
+    (key: 'Breakfast', label: '🍳 Breakfast'),
+    (key: 'Dessert', label: '🍓 Dessert'),
+  ];
 
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _onSearch(String query) {
+    if (query.trim().isNotEmpty) {
+      context.read<MealProvider>().searchMeals(query);
+    } else {
+      context.read<MealProvider>().loadMeals();
+    }
   }
 
   @override
@@ -29,58 +47,102 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
     return Column(
       children: [
-        // Search Bar
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: TextField(
-            controller: _searchCtrl,
-            onSubmitted: (q) {
-              context.read<MealProvider>().searchMeals(q);
-            },
-            decoration: InputDecoration(
-              hintText: 'Cari resep...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _searchCtrl.clear();
-                  context.read<MealProvider>().loadMeals();
-                },
-              ),
+        // 1. Search Bar & Filter Header
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(
+              bottom: BorderSide(color: AppColors.cardBorder, width: 1),
             ),
           ),
-        ),
-        // Filter Categories
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: _categories.map((cat) {
-              final isSelected = provider.currentCategory == cat;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  label: Text(cat),
-                  selected: isSelected,
-                  onSelected: (_) {
-                    context.read<MealProvider>().loadMeals(category: cat);
-                  },
-                  selectedColor: const Color(0xFF00BFA5),
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.bold,
-                  ),
+          child: Column(
+            children: [
+              // Search Input
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              );
-            }).toList(),
+                child: TextField(
+                  controller: _searchCtrl,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: _onSearch,
+                  decoration: InputDecoration(
+                    hintText: 'Search healthy recipes, ingredients...',
+                    hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryDark),
+                    suffixIcon: _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.cancel_rounded, color: AppColors.textLight, size: 20),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              context.read<MealProvider>().loadMeals();
+                              setState(() {});
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: Colors.transparent,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                  onChanged: (val) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Categories Chips
+              SizedBox(
+                height: 38,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: _categories.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final cat = _categories[index];
+                    final isSelected = provider.currentCategory == cat.key;
+
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      child: ChoiceChip(
+                        label: Text(cat.label),
+                        selected: isSelected,
+                        onSelected: (_) {
+                          _searchCtrl.clear();
+                          context.read<MealProvider>().loadMeals(category: cat.key);
+                        },
+                        showCheckmark: false,
+                        selectedColor: AppColors.primary,
+                        backgroundColor: Colors.white,
+                        side: BorderSide(
+                          color: isSelected ? AppColors.primary : AppColors.cardBorder,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.textDark,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          fontSize: 12.5,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 8),
-        // Grid
+
+        // 2. Grid & State Views
         Expanded(
           child: _buildGrid(provider),
         ),
@@ -90,24 +152,76 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Widget _buildGrid(MealProvider provider) {
     if (provider.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: AppColors.primary),
+            SizedBox(height: 16),
+            Text(
+              'Loading nutritious & delicious meals...',
+              style: TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      );
     }
+
     if (provider.error != null) {
       return ErrorView(
         message: provider.error!,
         onRetry: () => context.read<MealProvider>().loadMeals(),
       );
     }
+
     if (provider.meals.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search_off, size: 64, color: Colors.grey),
-            SizedBox(height: 12),
-            Text('Resep tidak ditemukan',
-                style: TextStyle(color: Colors.grey)),
-          ],
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF1F5F9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.no_meals_rounded,
+                  size: 56,
+                  color: AppColors.textLight,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'No Recipes Found',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textDark,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Try searching with another keyword or explore categories above.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  _searchCtrl.clear();
+                  context.read<MealProvider>().loadMeals(category: 'Seafood');
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text('Reset Search'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -121,12 +235,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 : 4;
 
         return GridView.builder(
+          physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.8,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.72,
           ),
           itemCount: provider.meals.length,
           itemBuilder: (context, index) {
