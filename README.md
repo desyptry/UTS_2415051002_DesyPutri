@@ -194,3 +194,12 @@ Profile pictures are located in `assets/images/`:
 - PDF: `UTS_2415051002_DesyPutri.pdf` (lampiran terpisah)
 - APK: `UTS_2415051002_DesyPutri.apk`
 *Built with ❤️ for UTS PTI Semester 5*
+# UTS Submission Checklist
+
+- [x] URL GitHub Repository
+- [x] APK Aplikasi (UTS_2415051002_DesyPutri.apk)
+- [x] PDF Dokumentasi
+- [x] Screenshot (Home, List, Detail, Create, Edit, Responsive, API, Database)
+- [x] Bukti git log --oneline
+- [x] README.md lengkap
+- [x] Demo Aplikasi & Penjelasan Arsitektur
