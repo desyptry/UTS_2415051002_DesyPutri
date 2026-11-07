@@ -120,20 +120,26 @@ lib/
 ├── providers/
 │   ├── health_provider.dart      # State log & favorit
 │   └── meal_provider.dart        # State resep
+├── repositories/                 # Folder untuk abstraksi data
 ├── screens/
 │   ├── adaptive_shell.dart       # Navigasi utama
 │   ├── home_screen.dart          # Dashboard
-│   ├── log_screen.dart           # Riwayat log
 │   ├── log_form_screen.dart      # Form create/edit log
-│   ├── recipes_screen.dart       # Katalog resep
+│   ├── log_screen.dart           # Riwayat log
+│   ├── profile_screen.dart       # Profil & BMI
 │   ├── recipe_detail_screen.dart # Detail resep
-│   └── profile_screen.dart       # Profil & BMI
+│   └── recipes_screen.dart       # Katalog resep
 ├── services/
 │   ├── health_service.dart       # CRUD Supabase
 │   └── meal_service.dart         # REST API TheMealDB
+├── theme/
+│   ├── app_colors.dart           # Konfigurasi warna
+│   └── app_theme.dart            # Konfigurasi tema
 └── widgets/
+    ├── app_logo.dart             # Widget logo aplikasi
     ├── error_view.dart           # Widget error reusable
-    └── meal_card.dart            # Card resep reusable
+    ├── meal_card.dart            # Card resep reusable
+    └── user_avatar.dart          # Widget avatar user
 Alur Data:
 
 UI (Screen) meminta data ke Provider.
